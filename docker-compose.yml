@@ -1,0 +1,32 @@
+version: '3'
+services:
+  mysql:
+    image: "mysql:5.6.47"
+    environment:
+      MYSQL_ROOT_PASSWORD: '1234'
+    command: --init-file /data/application/init.sql
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./containers/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./containers/mysql/init.sql:/data/application/init.sql
+
+  phpmyadmin:
+    image: nazarpc/phpmyadmin
+    ports:
+      - '50182:80'
+    links:
+      - mysql
+
+  php:
+    build: .
+    user: "root:root"
+    env_file: ./.env
+    environment:
+      - SEND_GRID_DRY_RUN
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - '50180:80'
+    links:
+      - mysql
